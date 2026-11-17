@@ -95,8 +95,6 @@ export default function Home() {
   function startNewGame() {
     setBoard(Array(9).fill(null));
     setCurrentPlayer("dinosaur");
-    setScores({ dinosaur: 0, unicorn: 0 });
-    setDraws(0);
   }
 
   const message = result
