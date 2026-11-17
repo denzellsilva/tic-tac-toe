@@ -41,7 +41,11 @@ function getGameResult(board: Mark[]): {
 } {
   for (const line of winningLines) {
     const [first, second, third] = line;
-    if (board[first] && board[first] === board[second] && board[first] === board[third]) {
+    if (
+      board[first] &&
+      board[first] === board[second] &&
+      board[first] === board[third]
+    ) {
       return { result: board[first], winningLine: line };
     }
   }
@@ -59,6 +63,7 @@ export default function Home() {
     dinosaur: 0,
     unicorn: 0,
   });
+  const [draws, setDraws] = useState(0);
 
   const { result, winningLine } = useMemo(() => getGameResult(board), [board]);
   const gameOver = result !== null;
@@ -78,8 +83,12 @@ export default function Home() {
         ...currentScores,
         [nextResult]: currentScores[nextResult] + 1,
       }));
+    } else if (nextResult === "draw") {
+      setDraws((currentDraws) => currentDraws + 1);
     } else if (!nextResult) {
-      setCurrentPlayer((player) => (player === "dinosaur" ? "unicorn" : "dinosaur"));
+      setCurrentPlayer((player) =>
+        player === "dinosaur" ? "unicorn" : "dinosaur",
+      );
     }
   }
 
@@ -87,6 +96,7 @@ export default function Home() {
     setBoard(Array(9).fill(null));
     setCurrentPlayer("dinosaur");
     setScores({ dinosaur: 0, unicorn: 0 });
+    setDraws(0);
   }
 
   const message = result
@@ -96,26 +106,23 @@ export default function Home() {
     : `${players[currentPlayer].name}'s turn`;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-sky-300 via-purple-300 to-pink-300 px-4 py-8 text-slate-900 sm:px-8 sm:py-12">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-sky-300 via-purple-300 to-pink-300 px-4 py-4 text-slate-900 sm:px-8 sm:py-6">
       <div className="pointer-events-none absolute -left-16 top-20 h-40 w-40 rounded-full bg-yellow-300/70 blur-sm" />
       <div className="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-pink-300/60" />
 
       <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center">
-        <header className="mb-8 text-center sm:mb-10">
-          <div className="mb-3 inline-flex rotate-[-2deg] items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.18em] text-violet-700 shadow-lg shadow-violet-400/20">
-            <span aria-hidden="true">✨</span> Tiny champions club
-          </div>
-          <h1 className="text-5xl font-black tracking-tight text-white drop-shadow-[0_4px_0_rgba(109,40,217,0.35)] sm:text-7xl">
+        <header className="mb-2 text-center lg:mb-6">
+          <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-[0_4px_0_rgba(109,40,217,0.35)] lg:text-6xl">
             Tic-Tac-Toe
           </h1>
-          <p className="mt-3 text-lg font-bold text-violet-950/75 sm:text-xl">
+          <p className="mt-1 hidden text-base font-bold text-violet-950/75 text-lg lg:block">
             Dino vs. Uni — who will rule the playground?
           </p>
         </header>
 
-        <section className="grid w-full gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
-          <div className="rounded-[2rem] border-4 border-white/80 bg-white/80 p-4 shadow-2xl shadow-violet-900/20 backdrop-blur sm:p-8">
-            <div className="mb-6 flex items-center justify-between gap-3">
+        <section className="grid w-full gap-2 lg:gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+          <div className="order-2 rounded-[2rem] border-4 border-white/80 bg-white/80 p-3 shadow-2xl shadow-violet-900/20 backdrop-blur sm:p-5 lg:order-1">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-extrabold uppercase tracking-widest text-violet-500">
                   Round time
@@ -124,13 +131,16 @@ export default function Home() {
                   {gameOver ? "Round complete!" : "Make your move!"}
                 </p>
               </div>
-              <span className="rounded-2xl bg-yellow-200 px-3 py-2 text-2xl shadow-inner" aria-hidden="true">
+              <span
+                className="rounded-2xl bg-yellow-200 px-2 py-1 text-xl shadow-inner"
+                aria-hidden="true"
+              >
                 🌈
               </span>
             </div>
 
             <div
-              className="grid aspect-square w-full grid-cols-3 gap-3 rounded-3xl bg-violet-200 p-3 sm:gap-4 sm:p-4"
+              className="mx-auto grid aspect-square w-4/5 max-w-[18rem] grid-cols-3 gap-1 rounded-xl bg-violet-200 p-1 sm:gap-1.5 sm:p-1.5"
               aria-label="Tic-Tac-Toe board"
               role="grid"
             >
@@ -141,13 +151,17 @@ export default function Home() {
                     key={index}
                     type="button"
                     role="gridcell"
-                    aria-label={mark ? `${players[mark].name}'s mark` : `Empty square ${index + 1}`}
+                    aria-label={
+                      mark
+                        ? `${players[mark].name}'s mark`
+                        : `Empty square ${index + 1}`
+                    }
                     disabled={Boolean(mark) || gameOver}
                     onClick={() => playTurn(index)}
-                    className={`flex aspect-square items-center justify-center rounded-2xl border-4 text-5xl shadow-[0_5px_0_rgba(109,40,217,0.2)] transition duration-150 ease-out sm:text-7xl ${
+                    className={`flex aspect-square items-center justify-center rounded-lg border-2 text-2xl shadow-[0_3px_0_rgba(109,40,217,0.2)] transition duration-150 ease-out sm:text-4xl ${
                       isWinningCell
                         ? "border-yellow-300 bg-yellow-100 animate-bounce"
-                        : "border-white bg-white hover:-translate-y-1 hover:scale-[1.03] hover:bg-yellow-50 active:translate-y-1 active:scale-95"
+                        : "border-white bg-white hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-yellow-50 active:translate-y-1 active:scale-95"
                     } disabled:cursor-default`}
                   >
                     {mark ? (
@@ -155,7 +169,10 @@ export default function Home() {
                         {players[mark].emoji}
                       </span>
                     ) : (
-                      <span className="text-3xl font-black text-violet-200" aria-hidden="true">
+                      <span
+                        className="text-xl font-black text-violet-200"
+                        aria-hidden="true"
+                      >
                         +
                       </span>
                     )}
@@ -165,8 +182,10 @@ export default function Home() {
             </div>
 
             <div
-              className={`mt-6 rounded-2xl px-4 py-3 text-center text-lg font-black ${
-                gameOver ? "bg-yellow-200 text-yellow-950" : "bg-sky-100 text-sky-900"
+              className={`mt-4 rounded-2xl px-3 py-2 text-center text-base font-black ${
+                gameOver
+                  ? "bg-yellow-200 text-yellow-950"
+                  : "bg-sky-100 text-sky-900"
               }`}
               role="status"
               aria-live="polite"
@@ -179,47 +198,57 @@ export default function Home() {
             <button
               type="button"
               onClick={startNewGame}
-              className="mt-4 w-full rounded-2xl bg-violet-600 px-6 py-4 text-lg font-black text-white shadow-[0_5px_0_#4c1d95] transition hover:scale-[1.02] hover:bg-violet-500 active:translate-y-1 active:shadow-none"
+              className="mt-3 w-full rounded-2xl bg-violet-600 px-5 py-3 text-base font-black text-white shadow-[0_5px_0_#4c1d95] transition hover:scale-[1.02] hover:bg-violet-500 active:translate-y-1 active:shadow-none"
             >
               {gameOver ? "Play again!" : "New game"}
             </button>
           </div>
 
-          <aside className="space-y-4">
-            <div className="rounded-[2rem] border-4 border-white/80 bg-white/80 p-5 shadow-xl shadow-violet-900/15 backdrop-blur">
-              <h2 className="mb-4 text-center text-xl font-black text-violet-950">Scoreboard</h2>
-              <div className="grid grid-cols-2 gap-3">
+          <aside className="order-1 lg:order-2">
+            <div className="rounded-2xl border-2 border-white/80 bg-white/80 p-2 shadow-xl shadow-violet-900/15 backdrop-blur lg:rounded-[2rem] lg:border-4 lg:p-4">
+              <h2 className=" hidden mb-2 text-center text-lg font-black text-violet-950 lg:block lg:mb-3 lg:text-xl">
+                Scoreboard
+              </h2>
+              <div className="grid grid-cols-3 gap-1 lg:gap-3">
                 {(Object.keys(players) as Player[]).map((player) => (
                   <div
                     key={player}
-                    className={`rounded-2xl p-4 text-center ${players[player].softColor} ${
-                      currentPlayer === player && !gameOver ? "ring-4 ring-yellow-300" : ""
+                    className={`rounded-xl p-1 text-center lg:rounded-2xl lg:p-2 ${players[player].softColor} ${
+                      currentPlayer === player && !gameOver
+                        ? "ring-2 ring-yellow-300 lg:ring-4"
+                        : ""
                     }`}
                   >
-                    <div className="text-4xl" aria-hidden="true">
+                    <div className="text-2xl lg:text-3xl" aria-hidden="true">
                       {players[player].emoji}
                     </div>
-                    <p className={`mt-1 font-black ${players[player].color}`}>{players[player].name}</p>
-                    <p className="text-4xl font-black text-violet-950">{scores[player]}</p>
-                    <p className="text-xs font-bold uppercase tracking-wider text-violet-500">wins</p>
+                    <p className={`mt-1 font-black ${players[player].color}`}>
+                      {players[player].name}
+                    </p>
+                    <p className="text-2xl font-black text-violet-950 lg:text-3xl">
+                      {scores[player]}
+                    </p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-violet-500">
+                      wins
+                    </p>
                   </div>
                 ))}
+                <div className="rounded-xl bg-slate-100 p-1 text-center lg:rounded-2xl lg:p-2">
+                  <div className="text-2xl lg:text-3xl" aria-hidden="true">
+                    🤝
+                  </div>
+                  <p className="mt-1 font-black text-slate-600">Draws</p>
+                  <p className="text-2xl font-black text-violet-950 lg:text-3xl">
+                    {draws}
+                  </p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    games
+                  </p>
+                </div>
               </div>
-            </div>
-
-            <div className="rounded-[2rem] bg-violet-950 p-5 text-center text-white shadow-xl shadow-violet-900/20">
-              <p className="text-3xl" aria-hidden="true">💡</p>
-              <h2 className="mt-2 font-black">How to play</h2>
-              <p className="mt-1 text-sm font-semibold leading-6 text-violet-200">
-                Take turns and get three of your friends in a row. Across, down, or diagonal!
-              </p>
             </div>
           </aside>
         </section>
-
-        <p className="mt-8 text-sm font-bold text-violet-950/70">
-          Made for giggles, high-fives, and friendly competition <span aria-hidden="true">💜</span>
-        </p>
       </div>
     </main>
   );
